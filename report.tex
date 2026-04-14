@@ -24,6 +24,10 @@
 \usepackage{tikz}
 \usepackage{pgfplots}
 \pgfplotsset{compat=1.18}
+\usepackage{subcaption}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{tcolorbox}
 
 % ─── Colour Palette ──────────────────────────────────────────────────────────
 \definecolor{primaryblue}{RGB}{0, 74, 127}
@@ -219,6 +223,7 @@
                         & \ph{Yash Gupta -- IMT2023125} \\
                         & \ph{Hitanshu Seth -- IMT2023100}\\
                         & \ph{Pranay Kelotra -- IMT2023563} \\[4pt]
+      \textbf{GitHub Repo} & \href{https://github.com/sidnovates/NoSQL-Hadoop-Assignment}{NoSQL-Hadoop-Assignment} \\[4pt]
       \textbf{Submitted} & \today \\
     \end{tabular}
   \end{minipage}
@@ -261,58 +266,78 @@ The program calculates the frequency of each word in the Wikipedia dataset. Two 
 
 \subsubsection{Pseudocode: Method 1 (Shell-based Sorting)}
 
-\begin{lstlisting}[style=pseudocode, caption={Top-50 Word Frequency -- Method 1}]
-// Setup: load skip patterns from Distributed Cache
-function setup(context):
-    skipPatterns = load_cache_files()
+\begin{algorithm}
+\caption{Top-50 Word Frequency --- Method 1}
+\begin{algorithmic}[1]
 
-// Mapper
-function Map(key, line):
-    cleanLine = line.toLowerCase()
-    tokens = cleanLine.split("[^a-z]+")
-    for each token in tokens:
-        if isValidToken(token, skipPatterns):
-            emit(token, 1)
+\State \textbf{class Mapper}
 
-// Reducer (Standard)
-function Reduce(word, counts):
-    emit(word, sum(counts))
-\end{lstlisting}
+\State \textbf{method} Setup()
+\State \quad Load skip patterns from Distributed Cache into set $S$
+
+\State \textbf{method} Map(key, line)
+\State \quad cleanLine $\gets$ lowercase(line)
+\State \quad tokens $\gets$ split(cleanLine, \verb|[^a-z]+|)
+\State \quad \textbf{for each} token $t$ in tokens \textbf{do}
+\State \qquad \textbf{if} isValidToken($t$, $S$) \textbf{then}
+\State \qquad\qquad Emit($t$, 1)
+\State \qquad \textbf{end if}
+\State \quad \textbf{end for}
+
+\vspace{0.5em}
+\State \textbf{class Reducer}
+
+\State \textbf{method} Reduce(word, counts)
+\State \quad $s \gets \sum counts$
+\State \quad Emit(word, $s$)
+
+\end{algorithmic}
+\end{algorithm}
 
 \subsubsection{Pseudocode: Method 2 (In-Reducer Sorting)}
 
-\begin{lstlisting}[style=pseudocode, caption={Top-50 Word Frequency -- Method 2 (WordCount2Mod)}]
-// Setup: load skip patterns from Distributed Cache
-function setup(context):
-    skipPatterns = load_cache_files()
+\begin{algorithm}
+\caption{Top-50 Word Frequency --- Method 2 (In-Reducer Sorting)}
+\begin{algorithmic}[1]
 
-// Mapper
-function Map(key, line):
-    cleanLine = line.toLowerCase()
-    tokens = cleanLine.split("[^a-z]+")
-    for each token in tokens:
-        if isValidToken(token, skipPatterns):
-            emit(token, 1)
+\State \textbf{class Mapper}
 
-// Reducer: with In-Memory Aggregation and Sorting
-wordCountMap = {}
+\State \textbf{method} Setup()
+\State \quad Load skip patterns from Distributed Cache into set $S$
 
-function Reduce(word, counts):
-    wordCountMap[word] = sum(counts)
+\State \textbf{method} Map(key, line)
+\State \quad cleanLine $\gets$ lowercase(line)
+\State \quad tokens $\gets$ split(cleanLine, \verb|[^a-z]+|)
+\State \quad \textbf{for each} token $t$ in tokens \textbf{do}
+\State \qquad \textbf{if} isValidToken($t$, $S$) \textbf{then}
+\State \qquad\qquad Emit($t$, 1)
+\State \qquad \textbf{end if}
+\State \quad \textbf{end for}
 
-function cleanup(context):
-    sortedList = sort_by_value_descending(wordCountMap)
-    for entry in sortedList.take(50):
-        emit(entry.key, entry.value)
-\end{lstlisting}
+\vspace{0.5em}
+\State \textbf{class Reducer}
+
+\State \quad Initialize empty map $M$
+
+\State \textbf{method} Reduce(word, counts)
+\State \quad $M[\text{word}] \gets \sum counts$
+
+\State \textbf{method} Cleanup()
+\State \quad $L \gets$ sort $M$ in descending order of frequency
+\State \quad \textbf{for each} entry $(w, c)$ in first 50 elements of $L$ \textbf{do}
+\State \qquad Emit($w$, $c$)
+\State \quad \textbf{end for}
+
+\end{algorithmic}
+\end{algorithm}
 
 \subsubsection{Post-processing (Method 1 Only)}
 
 For Method 1, since the Hadoop job outputs all word frequencies, the following shell command is required to sort and truncate the results:
 
-\begin{lstlisting}[style=bashcode]
-hdfs dfs -cat /Problem1/1a_ExtSort/part-r-* | sort -k2 -nr | head -50 > top50.txt
-\end{lstlisting}
+\begin{tcolorbox}[title=Post-processing command for Method 1, colback=black!5!white, colframe=black]
+\texttt{hdfs dfs -cat /Problem1/1a\_ExtSort/part-r-$*$ | sort -k2 -nr | head -50 > top50.txt}
+\end{tcolorbox}
 
 \subsubsection{Runtime Analysis}
 
@@ -348,20 +373,85 @@ The following table compares the execution performance of Method 1 (Standard Red
 
 \subsubsection{Results -- Top 50 Words}
 
-The following figures present the final output for the top-50 most frequent non-stop words and the cloud environment where the dataset is stored.
+The following layout presents the final output for the top-50 most frequent non-stop words alongside the cloud environment screenshot.
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.85\textwidth]{Problem1/1a/image.png}
-  \caption{Top-50 words output from the external sorting phase.}
-  \label{fig:top50_output}
+  \begin{minipage}[b]{0.58\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Problem1/1a/image.png}
+    \caption{Top-50 words output from the external sorting phase.}
+    \label{fig:top50_output}
+  \end{minipage}\hfill
+  \begin{minipage}[b]{0.38\textwidth}
+\begin{lstlisting}[style=bashcode, basicstyle=\ttfamily\tiny, numbers=none, breaklines=false, title={Terminal Output}]
+apos    273057
+quot    268016
+http    79117
+category 60536
+this    58767
+www     54691
+first   42276
+other   35814
+city    33146
+two     32565
+american 29215
+united  28849
+time    28369
+county  27917
+world   27485
+university 27048
+states  26856
+years   24147
+people  24062
+used    23497
+history 23324
+state   23109
+war     23095
+school  20039
+html    19928
+national 19814
+york    19687
+john    19318
+\end{lstlisting}
+  \end{minipage}
+\end{figure}
+\subsubsection{YARN ResourceManager Web UI }
+
+\begin{figure}[H]
+  \centering
+
+  \begin{subfigure}{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{ScreenShots/Problem1/1a/YARN1.png}
+    \caption{ACCEPTED}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{ScreenShots/Problem1/1a/YARN2.png}
+    \caption{RUNNING}
+  \end{subfigure}
+
+  \caption{YARN Resource Allocation UI}
 \end{figure}
 
+\subsubsection{Run Time Terminal Output }
+
 \begin{figure}[H]
   \centering
-  \fbox{\includegraphics[width=0.85\textwidth]{Problem1/1a/Screenshot 2026-04-13 185742.png}}
-  \caption{HDFS output storage layout showing the output directories for both Method 1 and Method 2.}
-  \label{fig:cloud_storage}
+
+  \begin{subfigure}{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{ScreenShots/Problem1/1a/Runtime.png}
+    \caption{In-Reducer Method}
+  \end{subfigure}\hfill
+\begin{subfigure}{0.48\textwidth}
+  \centering
+  \includegraphics[width=\linewidth, trim=0 0 0 150, clip]{ScreenShots/Problem1/1a/Runtime2.png}
+  \caption{Shell Sort}
+\end{subfigure}
+
+  \caption{YARN Resource Allocation UI}
 \end{figure}
 
 % ───────────────────────────────────────────────────────────
@@ -376,31 +466,37 @@ The program implements the Pairs approach to build a co-occurrence matrix for th
     \item \textbf{Mapper}: Processes text line by line and tokenizes it. For each word $w_i$ that is part of the top-50 set, it scans the subsequent $d$ words in the line. If a neighbor word $w_j$ is also in the top-50 set, the Mapper emits a composite key  ($w_i$,$w_j$) with a value of 1.
     \item \textbf{Reducer}: Aggregates the counts for each unique pair  ($w_i$,$w_j$) to determine the total number of times those words co-occurred within distance $d$ across the entire Wikipedia dataset.
 \end{itemize}
-
 \subsubsection{Pseudocode}
 
-\begin{lstlisting}[style=pseudocode, caption={Co-occurring Word Matrix -- Pairs Approach}]
-// Setup: load top-50 words and distance d
-function setup(context):
-    top50 = load_top_words_from_cache()
-    d = get_config("distance")
+\begin{algorithm}
+\caption{Co-occurring Word Matrix --- Pairs Approach}
+\begin{algorithmic}[1]
 
-// Mapper
-function Map(key, line):
-    tokens = line.toLowerCase().split()
-    for i = 0 to tokens.length - 1:
-        w1 = tokens[i]
-        if w1 in top50:
-            // Look ahead up to distance d
-            for j = i + 1 to min(i + d, tokens.length - 1):
-                w2 = tokens[j]
-                if w2 in top50:
-                    emit( (w1, w2), 1 )
+\State \textbf{// Setup: load top-50 words and distance d}
+\State \textbf{function} setup(context):
+\State \quad top50 $\gets$ load\_top\_words\_from\_cache()
+\State \quad d $\gets$ get\_config("distance")
 
-// Reducer
-function Reduce(pair, counts):
-    emit(pair, sum(counts))
-\end{lstlisting}
+\vspace{0.5em}
+\State \textbf{// Mapper}
+\State \textbf{function} Map(key, line):
+\State \quad tokens $\gets$ line.toLowerCase().split()
+\State \quad \textbf{for} $i = 0$ to tokens.length $- 1$:
+\State \qquad $w1 \gets$ tokens[i]
+\State \qquad \textbf{if} $w1$ in top50:
+\State \qquad\quad \textbf{// Look ahead up to distance d}
+\State \qquad\quad \textbf{for} $j = i + 1$ to $\min(i + d,\; \text{tokens.length} - 1)$:
+\State \qquad\qquad $w2 \gets$ tokens[j]
+\State \qquad\qquad \textbf{if} $w2$ in top50:
+\State \qquad\qquad\quad emit(( $w1$, $w2$ ), 1)
+
+\vspace{0.5em}
+\State \textbf{// Reducer}
+\State \textbf{function} Reduce(pair, counts):
+\State \quad Emit(pair, sum(counts))
+
+\end{algorithmic}
+\end{algorithm}
 
 \subsubsection{Runtime Analysis for $d \in \{1, 2, 3, 4\}$}
 
@@ -439,21 +535,33 @@ function Reduce(pair, counts):
   Overall, the pairs approach shows increasing computational and communication overhead with larger window sizes due to the growth in intermediate key-value pairs. This leads to higher execution time, making smaller window sizes more efficient for this approach.
 \end{infobox}
 
-\subsubsection{Selected Output Cases -- Pairs Approach}
+\subsubsection{Output Cases -- Pairs Approach}
 
-\begin{infobox}
-  \textbf{Representative Results:} \\
-  We show the smallest window case ($d = 1$) and the largest window case ($d = 4$) for the Pairs approach. The complete result set for $d \in \{1,2,3,4\}$ is available in the GitHub folder: \texttt{Problem1b}.
-\end{infobox}
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.85\textwidth]{ScreenShots/Problem1/1b/Pairs_D1.png}
-  \caption{Pairs approach, $d = 1$ (small case)}
-\end{figure}
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.85\textwidth]{ScreenShots/Problem1/1b/Pairs_D4.png}
-  \caption{Pairs approach, $d = 4$ (largest case)}
+  \begin{minipage}{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth, trim=0 0 300 0, clip]{ScreenShots/Problem1/1b/Pairs_D1.png}
+    \caption{Pairs approach, $d = 1$}
+  \end{minipage}\hfill
+  \begin{minipage}{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth, trim=0 0 300 0, clip]{ScreenShots/Problem1/1b/Pairs_D2.png}
+    \caption{Pairs approach, $d = 2$}
+  \end{minipage}
+
+  \vspace{1em}
+
+  \begin{minipage}{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth, trim=0 300 300 0, clip]{ScreenShots/Problem1/1b/Pairs_D3.png}
+    \caption{Pairs approach, $d = 3$}
+  \end{minipage}\hfill
+  \begin{minipage}{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth, trim=0 0 300 0, clip]{ScreenShots/Problem1/1b/Pairs_D4.png}
+    \caption{Pairs approach, $d = 4$}
+  \end{minipage}
 \end{figure}
 
 % ───────────────────────────────────────────────────────────
@@ -471,34 +579,43 @@ The Stripes approach optimizes the co-occurrence matrix generation by grouping n
 
 \subsubsection{Pseudocode}
 
-\begin{lstlisting}[style=pseudocode, caption={Co-occurring Word Matrix -- Stripes Approach}]
-// Setup: load top-50 words and distance d
-function setup(context):
-    top50 = load_top_words_from_cache()
-    d = get_config("distance")
+\begin{algorithm}
+\caption{Co-occurring Word Matrix --- Stripes Approach}
+\begin{algorithmic}[1]
 
-// Mapper
-function Map(key, line):
-    tokens = line.toLowerCase().split()
-    for i = 0 to tokens.length - 1:
-        w1 = tokens[i]
-        if w1 in top50:
-            stripe = {} // Associative array
-            for j = i + 1 to min(i + d, tokens.length - 1):
-                w2 = tokens[j]
-                if w2 in top50:
-                    stripe[w2] += 1
-            if stripe is not empty:
-                emit(w1, stripe)
+\State \textbf{// Setup: load top-50 words and distance d}
+\State \textbf{function} setup(context):
+\State \quad top50 $\gets$ load\_top\_words\_from\_cache()
+\State \quad d $\gets$ get\_config("distance")
 
-// Reducer
-function Reduce(word, stripes):
-    merged_stripe = {}
-    for each stripe in stripes:
-        for each (neighbor, count) in stripe:
-            merged_stripe[neighbor] += count
-    emit(word, merged_stripe)
-\end{lstlisting}
+\vspace{0.5em}
+\State \textbf{// Mapper}
+\State \textbf{function} Map(key, line):
+\State \quad tokens $\gets$ line.toLowerCase().split()
+\State \quad \textbf{for} $i = 0$ to tokens.length $- 1$:
+\State \qquad $w1 \gets$ tokens[i]
+\State \qquad \textbf{if} $w1$ in top50:
+\State \qquad\quad stripe $\gets$ \{\} \Comment{Associative array}
+\State \qquad\quad \textbf{for} $j = i + 1$ to $\min(i + d,\; \text{tokens.length} - 1)$:
+\State \qquad\qquad $w2 \gets$ tokens[j]
+\State \qquad\qquad \textbf{if} $w2$ in top50:
+\State \qquad\qquad\quad stripe[$w2$] += 1
+\State \qquad\quad \textbf{end for}
+\State \qquad\quad \textbf{if} stripe is not empty:
+\State \qquad\qquad emit($w1$, stripe)
+\State \quad \textbf{end for}
+
+\vspace{0.5em}
+\State \textbf{// Reducer}
+\State \textbf{function} Reduce(word, stripes):
+\State \quad merged\_stripe $\gets$ \{\}
+\State \quad \textbf{for each} stripe in stripes:
+\State \qquad \textbf{for each} (neighbor, count) in stripe:
+\State \qquad\quad merged\_stripe[neighbor] += count
+\State \quad Emit(word, merged\_stripe)
+
+\end{algorithmic}
+\end{algorithm}
 
 \subsubsection{Runtime Analysis for $d \in \{1, 2, 3, 4\}$}
 
@@ -536,21 +653,33 @@ function Reduce(word, stripes):
   \textbf{Conclusion:} \\
   Unlike earlier observations, the stripes approach does not always benefit from larger window sizes. While it reduces intermediate data emission, the overhead of maintaining large stripes outweighs these benefits at higher values of $d$. As a result, smaller window sizes provide better performance, and very large window sizes lead to significant performance degradation.
 \end{infobox}
-\subsubsection{Selected Output Cases -- Stripes Approach}
+\subsubsection{Output Cases -- Stripes Approach}
 
-\begin{infobox}
-  \textbf{Representative Results:} \\
-  We show the smallest window case ($d = 1$) and the largest window case ($d = 4$) for the Pairs approach. The complete result set for $d \in \{1,2,3,4\}$ is available in the GitHub folder: \texttt{Problem1b}.
-\end{infobox}
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.85\textwidth,height=4cm]{ScreenShots/Problem1/1c/Stripes_D1.png}
-  \caption{Stripes approach, $d = 1$ (small case)}
-\end{figure}
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.85\textwidth]{ScreenShots/Problem1/1c/Stripes_D4.png}
-  \caption{Stripes approach, $d = 4$ (largest case)}
+  \begin{minipage}{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth, trim=0 0 0 0, clip]{ScreenShots/Problem1/1c/Stripes_D1.png}
+    \caption{Stripes approach, $d = 1$}
+  \end{minipage}\hfill
+  \begin{minipage}{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth,  trim=0 0 0 0, clip]{ScreenShots/Problem1/1c/Stripes_D2.png}
+    \caption{Stripes approach, $d = 2$}
+  \end{minipage}
+
+  \vspace{1em}
+
+  \begin{minipage}{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth ,trim=0 0 0 0, clip]{ScreenShots/Problem1/1c/Stripes_D3.png}
+    \caption{Stripes approach, $d = 3$}
+  \end{minipage}\hfill
+  \begin{minipage}{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth,  trim=0 0 0 0, clip]{ScreenShots/Problem1/1c/Stripes_D4.png}
+    \caption{Stripes approach, $d = 4$}
+  \end{minipage}
 \end{figure}
 \subsubsection{Pairs vs.\ Stripes -- Comparison}
 
@@ -603,79 +732,100 @@ Local aggregation is a technique to reduce the volume of data shuffled across th
     \item \textbf{Pairs vs. Stripes Local Aggregation}: For the Pairs approach, local aggregation combines identical pair keys. For the Stripes approach, local aggregation merges multiple stripes for the same primary word, effectively performing a mini-reduction of associative arrays before they leave the Mapper.
 \end{itemize}
 
-\subsubsection{Pseudocode-Pairs}
+\subsubsection{Pseudocode}
 
-% ── 1e-ii ─────────────────────────────────────────────────
-\begin{lstlisting}[style=pseudocode, caption={Map-Function Level Local Aggregation}]
-function Map(key, line):
-    local_counts = {} // Initialized inside function
-    words = tokenize(line)
-    for i = 0 to words.length - 1:
-        for j = i + 1 to min(i + d, words.length - 1):
-            local_counts[(words[i], words[j])] += 1
-    
-    // Emit results for THIS map call
-    for each (pair, count) in local_counts:
-        emit(pair, count)
-\end{lstlisting}
+\begin{algorithm}
+\caption{Map-Function Level Local Aggregation}
+\begin{algorithmic}[1]
+
+\State \textbf{function} Map(key, line):
+\State \quad local\_counts $\gets$ \{\} \Comment{Initialized inside function}
+\State \quad words $\gets$ tokenize(line)
+\State \quad \textbf{for} $i = 0$ to words.length $- 1$:
+\State \qquad \textbf{for} $j = i + 1$ to $\min(i + d,\; \text{words.length} - 1)$:
+\State \qquad\quad local\_counts[(words[i], words[j])] += 1
+
+\vspace{0.5em}
+\State \quad \textbf{// Emit results for THIS map call}
+\State \quad \textbf{for each} (pair, count) in local\_counts:
+\State \qquad emit(pair, count)
+
+\end{algorithmic}
+\end{algorithm}
 
 
 
-\begin{lstlisting}[style=pseudocode, caption={Map-Class Level Local Aggregation}]
-// State maintained across map() calls
-globalMap = {} // Class instance variable
+\begin{algorithm}
+\caption{Map-Class Level Local Aggregation}
+\begin{algorithmic}[1]
 
-function setup(context):
-    globalMap = {} // Initialized once per task
+\State \textbf{// State maintained across map() calls}
+\State globalMap $\gets$ \{\} \Comment{Class instance variable}
 
-function Map(key, line):
-    words = tokenize(line)
-    for i = 0 to words.length - 1:
-        for j = i + 1 to min(i + d, words.length - 1):
-            globalMap[(words[i], words[j])] += 1
+\State \textbf{function} setup(context):
+\State \quad globalMap $\gets$ \{\} \Comment{Initialized once per task}
 
-function cleanup(context):
-    // Emit cumulative results for the ENTIRE task
-    for each (pair, count) in globalMap:
-        emit(pair, count)
-\end{lstlisting}
-\subsubsection{Pseudocode-Stripes}
+\State \textbf{function} Map(key, line):
+\State \quad words $\gets$ tokenize(line)
+\State \quad \textbf{for} $i = 0$ to words.length $- 1$:
+\State \qquad \textbf{for} $j = i + 1$ to $\min(i + d,\; \text{words.length} - 1)$:
+\State \qquad\quad globalMap[(words[i], words[j])] += 1
 
-\begin{lstlisting}[style=pseudocode, caption={Map-Function Level Local Aggregation -- Stripes}]
-function Map(key, line):
-    localStripes = {} // Map<Word, Stripe> (per record)
-    words = tokenize(line)
-    for i = 0 to words.length - 1:
-        if words[i] in top50:
-            for j = i + 1 to min(i+d, words.length - 1):
-                if words[j] in top50:
-                    localStripes[words[i]][words[j]] += 1
-    
-    // Emit results for THIS record
-    for each (word, stripe) in localStripes:
-        emit(word, stripe)
-\end{lstlisting}
+\State \textbf{function} cleanup(context):
+\State \quad \textbf{// Emit cumulative results for the ENTIRE task}
+\State \quad \textbf{for each} (pair, count) in globalMap:
+\State \qquad emit(pair, count)
 
-\begin{lstlisting}[style=pseudocode, caption={Map-Class Level Local Aggregation -- Stripes (In-Mapper Combining)}]
-// State maintained across map() calls
-globalStripes = {} // Map<Word, Stripe>
+\end{algorithmic}
+\end{algorithm}
 
-function setup(context):
-    globalStripes = {}
 
-function Map(key, line):
-    words = tokenize(line)
-    for i = 0 to words.length - 1:
-        if words[i] in top50:
-            for j = i + 1 to min(i+d, words.length - 1):
-                if words[j] in top50:
-                    globalStripes[words[i]][words[j]] += 1
+\begin{algorithm}
+\caption{Map-Function Level Local Aggregation --- Stripes}
+\begin{algorithmic}[1]
 
-function cleanup(context):
-    // Emit cumulative stripes for the ENTIRE task
-    for each (word, stripe) in globalStripes:
-        emit(word, stripe)
-\end{lstlisting}
+\State \textbf{function} Map(key, line):
+\State \quad localStripes $\gets$ \{\} \Comment{Map<Word, Stripe> (per record)}
+\State \quad words $\gets$ tokenize(line)
+\State \quad \textbf{for} $i = 0$ to words.length $- 1$:
+\State \qquad \textbf{if} words[i] in top50:
+\State \qquad\quad \textbf{for} $j = i + 1$ to $\min(i + d,\; \text{words.length} - 1)$:
+\State \qquad\qquad \textbf{if} words[j] in top50:
+\State \qquad\qquad\quad localStripes[words[i]][words[j]] += 1
+
+\vspace{0.5em}
+\State \quad \textbf{// Emit results for THIS record}
+\State \quad \textbf{for each} (word, stripe) in localStripes:
+\State \qquad emit(word, stripe)
+
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{Map-Class Level Local Aggregation --- Stripes (In-Mapper Combining)}
+\begin{algorithmic}[1]
+
+\State \textbf{// State maintained across map() calls}
+\State globalStripes $\gets$ \{\} \Comment{Map<Word, Stripe>}
+
+\State \textbf{function} setup(context):
+\State \quad globalStripes $\gets$ \{\}
+
+\State \textbf{function} Map(key, line):
+\State \quad words $\gets$ tokenize(line)
+\State \quad \textbf{for} $i = 0$ to words.length $- 1$:
+\State \qquad \textbf{if} words[i] in top50:
+\State \qquad\quad \textbf{for} $j = i + 1$ to $\min(i + d,\; \text{words.length} - 1)$:
+\State \qquad\qquad \textbf{if} words[j] in top50:
+\State \qquad\qquad\quad globalStripes[words[i]][words[j]] += 1
+
+\State \textbf{function} cleanup(context):
+\State \quad \textbf{// Emit cumulative stripes for the ENTIRE task}
+\State \quad \textbf{for each} (word, stripe) in globalStripes:
+\State \qquad emit(word, stripe)
+
+\end{algorithmic}
+\end{algorithm}
 
 \subsubsection{Pairs Approach -- Local Aggregation Runtime Comparison}
 % ── 1e-iii -- PAIRS tables ─────────────────────────────────
@@ -754,35 +904,132 @@ function cleanup(context):
   \end{tabular}
 \end{table}
 
-\subsubsection{Selected Output Cases -- Local Aggregation}
+\subsubsection{Output Cases -- Local Aggregation}
 
 \begin{infobox}
   \textbf{Representative Results:} \\
-  The following cases are shown for local aggregation at $d = 3$: Pairs Map-Function, Pairs Map-Class, Stripes Map-Function, and Stripes Map-Class. The complete set of local aggregation results is available in the GitHub folder: \texttt{Problem1d}.
+  We present results for local aggregation across both Pairs and Stripes approaches for window sizes $d \in \{1,2,3,4\}$. 
+  For each approach, both Map-Class-Level Aggregation and Map-Function-Level Aggregation are shown. 
 \end{infobox}
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.85\textwidth]{ScreenShots/Problem1/1d/Pairs/MapFunctionLevelAgg/D3.png}
-  \caption{Pairs Map-Function aggregation, $d = 3$}
-\end{figure}
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.85\textwidth]{ScreenShots/Problem1/1d/Pairs/MapClassLevelAgg/D3.png}
-  \caption{Pairs Map-Class aggregation, $d = 3$}
+
+  \begin{subfigure}{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth, trim=0 0 0 0, clip]{ScreenShots/Problem1/1d/Stripes/MapClassLevelAgg/D1.png}
+    \caption{$d = 1$}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth, trim=0 0 0 0, clip]{ScreenShots/Problem1/1d/Stripes/MapClassLevelAgg/D2.png}
+    \caption{$d = 2$}
+  \end{subfigure}
+
+  \vspace{1em}
+
+  \begin{subfigure}{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth, trim=0 0 0 0, clip]{ScreenShots/Problem1/1d/Stripes/MapClassLevelAgg/D3.png}
+    \caption{$d = 3$}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth, trim=0 0 0 0, clip]{ScreenShots/Problem1/1d/Stripes/MapClassLevelAgg/D4.png}
+    \caption{$d = 4$}
+  \end{subfigure}
+  \caption{Stripes (Map-Class Aggregation) for different window sizes}
 \end{figure}
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.85\textwidth]{ScreenShots/Problem1/1d/Stripes/MapClassLevelAgg/D3.png}
-  \caption{Stripes Map-Function aggregation, $d = 3$}
-\end{figure}
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.85\textwidth]{ScreenShots/Problem1/1d/Stripes/MapClassLevelAgg/D3.png}
-  \caption{Stripes Map-Class aggregation, $d = 3$}
+
+  \begin{subfigure}{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth, trim=0 0 300 0, clip]{ScreenShots/Problem1/1d/Pairs/MapClassLevelAgg/D1.png}
+    \caption{$d = 1$}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth, trim=0 0 300 0, clip]{ScreenShots/Problem1/1d/Pairs/MapClassLevelAgg/D2.png}
+    \caption{$d = 2$}
+  \end{subfigure}
+
+  \vspace{1em}
+
+  \begin{subfigure}{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth, trim=0 0 300 0, clip]{ScreenShots/Problem1/1d/Pairs/MapClassLevelAgg/D3.png}
+    \caption{$d = 3$}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth, trim=0 0 300 0, clip]{ScreenShots/Problem1/1d/Pairs/MapClassLevelAgg/D4.png}
+    \caption{$d = 4$}
+  \end{subfigure}
+
+  \caption{Pairs (Map-Class Aggregation) for different window sizes}
 \end{figure}
 
+\begin{figure}[H]
+  \centering
+
+  \begin{subfigure}{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth, trim=0 0 0 0, clip]{ScreenShots/Problem1/1d/Stripes/MapFunctionLevelAgg/D1.png}
+    \caption{$d = 1$}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth, trim=0 0 0 0, clip]{ScreenShots/Problem1/1d/Stripes/MapFunctionLevelAgg/D2.png}
+    \caption{$d = 2$}
+  \end{subfigure}
+
+  \vspace{1em}
+
+  \begin{subfigure}{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth, trim=0 0 0 0, clip]{ScreenShots/Problem1/1d/Stripes/MapFunctionLevelAgg/D3.png}
+    \caption{$d = 3$}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth, trim=0 0 0 0, clip]{ScreenShots/Problem1/1d/Stripes/MapClassLevelAgg/D4.png}
+    \caption{$d = 4$}
+  \end{subfigure}
+  \caption{Stripes (Map-Function Aggregation) for different window sizes}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+
+  \begin{subfigure}{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth, trim=0 0 300 0, clip]{ScreenShots/Problem1/1d/Pairs/MapFunctionLevelAgg/D1.png}
+    \caption{$d = 1$}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth, trim=0 0 300 0, clip]{ScreenShots/Problem1/1d/Pairs/MapFunctionLevelAgg/D3.png}
+    \caption{$d = 2$}
+  \end{subfigure}
+
+  \vspace{1em}
+
+  \begin{subfigure}{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth, trim=0 0 300 0, clip]{ScreenShots/Problem1/1d/Pairs/MapFunctionLevelAgg/D3.png}
+    \caption{$d = 3$}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth, trim=0 0 300 0, clip]{ScreenShots/Problem1/1d/Pairs/MapFunctionLevelAgg/D4.png}
+    \caption{$d = 4$}
+  \end{subfigure}
+
+  \caption{Pairs (Map-Functions Aggregation) for different window sizes}
+\end{figure}
+\clearpage
 % ── 1e-v -- Summary comparison ─────────────────────────────
 \subsubsection{Summary: Performance Comparison Across All Variants}
 
@@ -829,7 +1076,7 @@ function cleanup(context):
   \textbf{Map-function limitation:} \\
   Map-function aggregation operates at a finer granularity, limiting its ability to effectively reduce intermediate emissions. This results in higher communication overhead and longer execution time.
 \end{infobox}
-
+\vspace{0.5em}
 \begin{infobox}
   \textbf{2. Stripes: Map-Function vs.\ Map-Class Aggregation}
   \vspace{0.5em}
@@ -849,7 +1096,7 @@ function cleanup(context):
   \textbf{What it implies:} \\
   This indicates that map-class aggregation is more effective in managing large stripe structures by reducing redundant emissions and improving data locality.
 \end{infobox}
-
+\clearpage
 \begin{infobox}
   \textbf{3. Effect of Local Aggregation \& Overall Comparison}
   \vspace{0.5em}
@@ -861,7 +1108,7 @@ function cleanup(context):
   \textbf{Pairs Approach Benefit:} \\
   In the pairs approach, local aggregation leads to substantial performance gains, with map-class aggregation emerging as the most efficient strategy.
   \vspace{0.5em}
-  
+
   \textbf{Stripes Approach Benefit:} \\
   In the stripes approach, although local aggregation still provides benefits, the improvements are less dramatic. This is because the stripes approach inherently performs aggregation by grouping neighboring words into a single data structure. However, at larger window sizes, the overhead of managing large stripes dominates performance, especially in the absence of efficient aggregation.
 \end{infobox}
@@ -874,7 +1121,7 @@ function cleanup(context):
     
     \fbox{\includegraphics[width=0.8\textwidth]{pairs_local_agg.png}}
     \caption{Pairs Approach: Map-Function vs.\ Map-Class}
-    
+
     \vspace{0.5cm}
     
     \fbox{\includegraphics[width=0.8\textwidth]{stripes_local_agg.png}}
@@ -895,6 +1142,48 @@ function cleanup(context):
 
 % ───────────────────────────────────────────────────────────
 \subsection{Part (a): Document Frequency Computation}
+\subsubsection{Pseudocode}
+
+\begin{algorithm}
+\caption{Document Frequency --- Map and Reduce}
+\begin{algorithmic}[1]
+
+\State \textbf{// Setup: load stopwords and initialize stemmer}
+\State \textbf{function} setup(context):
+\State \quad stopwords $\gets$ load\_from\_cache()
+\State \quad stemmer $\gets$ new PorterStemmer()
+
+\vspace{0.5em}
+\State \textbf{// Mapper}
+\State \textbf{function} Map(filePath, line):
+\State \quad docId $\gets$ extract\_filename\_without\_extension(filePath)
+\State \quad tokens $\gets$ tokenize(line.toLowerCase())
+\State \quad seenThisLine $\gets$ \{\}
+
+\State \quad \textbf{for each} token in tokens:
+\State \qquad \textbf{if} not isValidToken(token):
+\State \qquad\quad continue
+\State \qquad \textbf{if} token in stopwords:
+\State \qquad\quad continue
+\State \qquad stemmed $\gets$ stemmer.stem(token)
+\State \qquad \textbf{if} not isValidToken(stemmed):
+\State \qquad\quad continue
+\State \qquad \textbf{if} stemmed in stopwords:
+\State \qquad\quad continue
+\State \qquad \textbf{if} stemmed not in seenThisLine:
+\State \qquad\quad seenThisLine.add(stemmed)
+\State \qquad\quad emit(stemmed, docId)
+
+\vspace{0.5em}
+\State \textbf{// Reducer}
+\State \textbf{function} Reduce(term, docIds):
+\State \quad distinctDocs $\gets$ \{\}
+\State \quad \textbf{for each} docId in docIds:
+\State \qquad distinctDocs.add(docId)
+\State \quad emit(term, size(distinctDocs))
+
+\end{algorithmic}
+\end{algorithm}
 
 \subsubsection{Program Logic}
 
@@ -907,41 +1196,7 @@ The Document Frequency (DF) program identifies the total number of documents (or
     \item \textbf{Post-processing}: The resulting TSV is sorted numerically by DF in descending order using shell commands to identify the top-100 terms.
 \end{itemize}
 
-\subsubsection{Pseudocode}
 
-\begin{lstlisting}[style=pseudocode, caption={Document Frequency -- Map and Reduce}]
-// Setup: load stopwords and initialize stemmer
-function setup(context):
-    stopwords = load_from_cache()
-    stemmer = new PorterStemmer()
-
-// Mapper
-function Map(filePath, line):
-    docId = extract_filename_without_extension(filePath)
-    tokens = tokenize(line.toLowerCase())
-    seenThisLine = {}
-
-    for each token in tokens:
-        if not isValidToken(token):
-            continue
-        if token in stopwords:
-            continue
-        stemmed = stemmer.stem(token)
-        if not isValidToken(stemmed):
-            continue
-        if stemmed in stopwords:
-            continue
-        if stemmed not in seenThisLine:
-            seenThisLine.add(stemmed)
-            emit(stemmed, docId)
-
-// Reducer
-function Reduce(term, docIds):
-    distinctDocs = {}
-    for each docId in docIds:
-        distinctDocs.add(docId)
-    emit(term, size(distinctDocs))
-\end{lstlisting}
 
 \subsubsection{Post-processing for Top-100 Terms}
 
@@ -990,8 +1245,52 @@ The output TSV file has the following schema:
 
 
 % ───────────────────────────────────────────────────────────
+\clearpage
 \subsection{Part (b): TF-IDF Score Computation -- Stripes Approach}
+\subsubsection{Pseudocode}
 
+\begin{algorithm}
+\caption{TF-IDF Score --- Stripes MapReduce}
+\begin{algorithmic}[1]
+
+\State \textbf{// Setup: load DF map from Distributed Cache (Mapper \& Reducer)}
+\State \textbf{function} setup(context):
+\State \quad df\_map $\gets$ load\_tsv\_as\_map(cache\_file) \Comment{Maps term $\to$ DF}
+
+\vspace{0.5em}
+\State \textbf{// Mapper (Stripes)}
+\State \textbf{function} Map(filePath, line):
+\State \quad docID $\gets$ extract\_filename\_without\_extension(filePath)
+\State \quad stripe $\gets$ docStripes[docID] if exists else \{\}
+\State \quad tokens $\gets$ tokenize(line.toLowerCase())
+\State \quad \textbf{for each} token in tokens:
+\State \qquad stemmed $\gets$ stem(token)
+\State \qquad \textbf{if} stemmed in df\_map:
+\State \qquad\quad stripe[stemmed] += 1
+\State \quad docStripes[docID] $\gets$ stripe
+
+\State \textbf{function} cleanup(context):
+\State \quad \textbf{for each} (docID, stripe) in docStripes:
+\State \qquad stripeString $\gets$ serialize\_stripe(stripe) \Comment{term:count|term:count|...}
+\State \qquad emit(docID, stripeString)
+
+\vspace{0.5em}
+\State \textbf{// Reducer}
+\State \textbf{function} Reduce(docID, stripeStrings):
+\State \quad termCounts $\gets$ \{\}
+\State \quad \textbf{for each} stripeString in stripeStrings:
+\State \qquad pairs $\gets$ split(stripeString, "|")
+\State \qquad \textbf{for each} pair in pairs:
+\State \qquad\quad (term, count) $\gets$ split(pair, ":")
+\State \qquad\quad termCounts[term] += parseInt(count)
+
+\State \quad \textbf{for each} (term, tf) in termCounts:
+\State \qquad df $\gets$ df\_map[term]
+\State \qquad score $\gets$ tf * log(10000.0 / df + 1)
+\State \qquad emit(docID, term + "\textbackslash t" + format(score, 6))
+
+\end{algorithmic}
+\end{algorithm}
 \subsubsection{Program Logic}
 
 The Stripes approach is used to efficiently compute the TF-IDF scores for the top-100 high-DF terms across Wikipedia documents.
@@ -1012,43 +1311,7 @@ The Stripes approach is used to efficiently compute the TF-IDF scores for the to
 
 where $\text{TF}(t, d)$ is the count of term $t$ in document $d$, and $\text{DF}(t)$ is the number of distinct documents containing $t$ across the entire corpus.
 
-\subsubsection{Pseudocode}
 
-\begin{lstlisting}[style=pseudocode, caption={TF-IDF Score -- Stripes MapReduce}]
-// Setup: load DF map from Distributed Cache (Mapper & Reducer)
-function setup(context):
-    df_map = load_tsv_as_map(cache_file) // Maps term -> DF
-
-// Mapper (Stripes)
-function Map(filePath, line):
-    docID = extract_filename_without_extension(filePath)
-    stripe = docStripes[docID] if exists else {}
-    tokens = tokenize(line.toLowerCase())
-    for each token in tokens:
-        stemmed = stem(token)
-        if stemmed in df_map:
-            stripe[stemmed] += 1
-    docStripes[docID] = stripe
-
-function cleanup(context):
-    for each (docID, stripe) in docStripes:
-        stripeString = serialize_stripe(stripe)  // term:count|term:count|...
-        emit(docID, stripeString)
-
-// Reducer
-function Reduce(docID, stripeStrings):
-    termCounts = {}
-    for each stripeString in stripeStrings:
-        pairs = split(stripeString, "|")
-        for each pair in pairs:
-            (term, count) = split(pair, ":")
-            termCounts[term] += parseInt(count)
-
-    for each (term, tf) in termCounts:
-        df = df_map[term]
-        score = tf * log(10000.0 / df + 1)
-        emit(docID, term + "\t" + format(score, 6))
-\end{lstlisting}
 
 
 \subsubsection{Runtime Analysis}
@@ -1078,7 +1341,7 @@ The \texttt{ID} field uses dynamically generated integer IDs derived from the by
 \subsubsection{Representative TF-IDF Output}
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.85\textwidth]{ScreenShots/Problem2/TFIDF_Scores.png}
+  \includegraphics[width=0.85\textwidth]{ScreenShots/Problem2/TIFIDF_Scores_Long.png}
   \caption{TF-IDF Output }
 \end{figure}
 
