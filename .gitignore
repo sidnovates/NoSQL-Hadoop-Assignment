@@ -28,3 +28,6 @@ Dataset/
 .idea/
 *.swp
 *.swo
+
+#Ignore zip files
+*.zip
