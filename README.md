@@ -1,29 +1,58 @@
-# NoSQL Assignment 2: Hadoop MapReduce Analysis
+<div align="center">
 
-This repository contains the implementation and analysis for NoSQL Assignment 2, focusing on Hadoop MapReduce programs for Co-occurrence analysis (Pairs and Stripes approaches) and Indexing Documents.
+# 🐘 NoSQL Assignment 2: Hadoop MapReduce Analysis
 
-## 🚀 Repository Overview
+![Hadoop](https://img.shields.io/badge/Apache_Hadoop-66CCFF?style=for-the-badge&logo=apachehadoop&logoColor=black)
+![Java](https://img.shields.io/badge/Java-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
+![LaTeX](https://img.shields.io/badge/LaTeX-008080?style=for-the-badge&logo=latex&logoColor=white)
 
-The project is organized as follows:
+*A comprehensive exploration of **Co-occurrence Analysis** and **Document Indexing** using Hadoop MapReduce paradigms.*
 
-- **[Assig2/](file:///c:/Siddharth/Desktop/SEM6/NOSQL/Assignments/Assignment_2/Assig2)**: Contains the source code for the following problems:
-  - `Prob1/`: **Problem 1: Co-occurring Word Matrix Generation** (Pairs, Stripes, and Local Aggregation).
-  - `Prob2/`: **Problem 2: Indexing Documents via Hadoop**.
-- **[RunTimeAnalysis/](file:///c:/Siddharth/Desktop/SEM6/NOSQL/Assignments/Assignment_2/RunTimeAnalysis)**: Contains performance metrics and comparative charts. The analysis was performed on both the **Large dataset** and the **Testing dataset** to observe scalability.
-- **[ScreenShots/](file:///c:/Siddharth/Desktop/SEM6/NOSQL/Assignments/Assignment_2/ScreenShots)**: Visual logs of program execution and output results.
-- **[Problem_1.txt](file:///c:/Siddharth/Desktop/SEM6/NOSQL/Assignments/Assignment_2/Problem_1.txt)** & **[Problem_2.txt](file:///c:/Siddharth/Desktop/SEM6/NOSQL/Assignments/Assignment_2/Problem_2.txt)**: Documentation on how to compile and run the codes for each problem.
-- **[report.tex](file:///c:/Siddharth/Desktop/SEM6/NOSQL/Assignments/Assignment_2/report.tex)**: The LaTeX source document for the comprehensive assignment report.
-- **[NoSQL_Assignment2.pdf](file:///c:/Siddharth/Desktop/SEM6/NOSQL/Assignments/Assignment_2/NoSQL_Assignment2.pdf)**: The original assignment specification.
+</div>
+
+---
+
+## 🎯 Project Overview
+
+This repository contains the MapReduce implementation, runtime analysis, and execution documentation for NoSQL Assignment 2. The project focuses on building scalable algorithms to solve two main challenges:
+1. **Co-occurring Word Matrix Generation** evaluating **Pairs** vs. **Stripes** approaches, and the effects of **Local Aggregation**.
+2. **Indexing Documents** over massive text datasets leveraging the Hadoop ecosystem.
+
+---
+
+## 📂 Repository Structure
+
+| Directory / File | Description |
+|------------------|-------------|
+| 💻 **[`Assig2/`](./Assig2)** | Main source code containing Java MapReduce implementations.<br> - `Prob1/`: Word Matrix Generation (Pairs, Stripes).<br> - `Prob2/`: Document Indexing. |
+| 📈 **[`RunTimeAnalysis/`](./RunTimeAnalysis)** | Detailed performance metrics, scalability data, and comparative analysis (Testing vs. Large datasets). |
+| 📸 **[`ScreenShots/`](./ScreenShots)** | Visual execution logs, Hadoop Namenode UI views, and graphical output verifications. |
+| ⚙️ **[`Problem_1.txt`](./Problem_1.txt) / [`Problem_2.txt`](./Problem_2.txt)** | Step-by-step compilation and execution commands for the Hadoop cluster. |
+| 📝 **[`report.tex`](./report.tex)** | The comprehensive LaTeX final report document. |
+| 📋 **[`NoSQL_Assignment2.pdf`](./NoSQL_Assignment2.pdf)** | Original assignment specification and exact problem statements. |
+
+> **Note:** The `Dataset/` folder has been intentionally excluded from Git tracking due to GitHub's file size limits, but the structure is required locally for execution.
+
+---
 
 ## 🛠️ How to Run
 
-Please refer to `Problem_1.txt` and `Problem_2.txt` for specific compilation and execution commands for the Hadoop cluster.
-
-## 📊 Analysis
-
-The `RunTimeAnalysis` folder documents the efficiency differences and scalability of the solutions when executed on both **Testing** and **Large** datasets. Key areas of focus include:
-- Scalability of Pairs vs. Stripes approaches.
-- Performance impact of Local Aggregation (Combiners).
+Detailed compilation and execution instructions for the Hadoop ecosystem can be found in the root documentation files:
+- 👉 See **[`Problem_1.txt`](./Problem_1.txt)** for compiling and running the Co-occurrence Matrix code.
+- 👉 See **[`Problem_2.txt`](./Problem_2.txt)** for compiling and running the Document Indexing code.
 
 ---
-*Developed as part of the NoSQL Systems course (Semester 6).*
+
+## 📊 Performance Analysis
+
+The `RunTimeAnalysis` documents critically evaluate the efficiency of the developed MapReduce algorithms. Key analytical points include:
+
+- ⚖️ **Pairs vs. Stripes:** Evaluating the memory overhead of Stripes versus the sorting overhead of Pairs.
+- ⚡ **Local Aggregation:** Assessing network shuffle reduction using In-Mapper Combiners.
+- 📈 **Scalability Testing:** Comparing runtime differences across small verification sets and large-scale real-world data.
+
+---
+
+<div align="center">
+  <i>🎓 Developed as part of the NoSQL Systems course (Semester 6).</i>
+</div>
