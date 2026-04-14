@@ -1,6 +1,6 @@
 # NoSQL Assignment 2: Hadoop MapReduce Analysis
 
-This repository contains the implementation and analysis for NoSQL Assignment 2, focusing on Hadoop MapReduce programs for Word Count and Co-occurrence analysis (Pairs and Stripes approaches).
+This repository contains the implementation and analysis for NoSQL Assignment 2, focusing on Hadoop MapReduce programs for Co-occurrence analysis (Pairs and Stripes approaches) and Indexing Documents.
 
 ## 🚀 Repository Overview
 
@@ -22,10 +22,8 @@ Please refer to `Problem_1.txt` and `Problem_2.txt` for specific compilation and
 ## 📊 Analysis
 
 The `RunTimeAnalysis` folder documents the efficiency differences and scalability of the solutions when executed on both **Testing** and **Large** datasets. Key areas of focus include:
-- Scalability of Pairs vs. Stripes approaches for Co-occurrence.
+- Scalability of Pairs vs. Stripes approaches.
 - Performance impact of Local Aggregation (Combiners).
-- Efficiency of Document Indexing at scale.
-- Performance impact of varying reducer counts.
 
 ---
 *Developed as part of the NoSQL Systems course (Semester 6).*
