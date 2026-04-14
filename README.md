@@ -9,9 +9,6 @@ The project is organized as follows:
 - **[Assig2/](file:///c:/Siddharth/Desktop/SEM6/NOSQL/Assignments/Assignment_2/Assig2)**: Contains the source code for the following problems:
   - `Prob1/`: **Problem 1: Co-occurring Word Matrix Generation** (Pairs, Stripes, and Local Aggregation).
   - `Prob2/`: **Problem 2: Indexing Documents via Hadoop**.
-- **[Dataset/](file:///c:/Siddharth/Desktop/SEM6/NOSQL/Assignments/Assignment_2/Dataset)**: Data files used for processing.
-  - `ActualData/`: Large-scale dataset for real-world performance testing.
-  - `TestingData/`: Small-scale dataset for logic verification.
 - **[RunTimeAnalysis/](file:///c:/Siddharth/Desktop/SEM6/NOSQL/Assignments/Assignment_2/RunTimeAnalysis)**: Contains performance metrics and comparative charts. The analysis was performed on both the **Large dataset** and the **Testing dataset** to observe scalability.
 - **[ScreenShots/](file:///c:/Siddharth/Desktop/SEM6/NOSQL/Assignments/Assignment_2/ScreenShots)**: Visual logs of program execution and output results.
 - **[Problem_1.txt](file:///c:/Siddharth/Desktop/SEM6/NOSQL/Assignments/Assignment_2/Problem_1.txt)** & **[Problem_2.txt](file:///c:/Siddharth/Desktop/SEM6/NOSQL/Assignments/Assignment_2/Problem_2.txt)**: Documentation on how to compile and run the codes for each problem.
