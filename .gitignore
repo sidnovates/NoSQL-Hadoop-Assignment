@@ -1,0 +1,30 @@
+# Java compiled files
+*.class
+*.jar
+*.war
+*.ear
+
+# LaTeX auxiliary files
+*.aux
+*.log
+*.out
+*.toc
+*.pdf
+*.snm
+*.nav
+*.synctex.gz
+*.fdb_latexmk
+*.fls
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Datasets (Large files)
+Dataset/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo

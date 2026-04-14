@@ -1,0 +1,52 @@
+Problem_2
+
+2a. DocumentFrequency.java:
+
+Compile
+javac -classpath "`hadoop classpath`:/home/siddharth/Hadoop_Project/Assignment2/Problem2/opennlp-tools-1.9.3.jar" -d build DocumentFrequency.java
+
+jar cf df.jar -C build .
+
+# unpack OpenNLP into a temp dir and merge into df.jar
+mkdir -p tmp-opennlp
+cd tmp-opennlp
+jar xf /home/siddharth/Hadoop_Project/Assignment2/Problem2/opennlp-tools-1.9.3.jar
+jar uf ../df.jar .
+cd ..
+rm -rf tmp-opennlp
+
+Run
+
+time hadoop jar df.jar parta.DocumentFrequency /largerDataset/Wikipedia-EN-20120601_ARTICLES /Problem2/2a /Problem2/stopwords.txt
+
+Sort and Save:
+hdfs dfs -cat /Problem2/2a/part-r-* | sort -k2,2nr | head -100 > top100-df.ts
+
+Save all df:
+hdfs dfs -cat /Problem2/2a/part-r-* > df-all.tsv
+
+2b. TFIDFScorer_Stripes.java:
+
+Compile
+rm -rf build
+mkdir -p build
+javac -classpath "`hadoop classpath`:/home/siddharth/Hadoop_Project/Assig2/Prob2/opennlp-tools-1.9.3.jar" \
+  -d build \
+  DocumentFrequency.java \
+  TFIDFScorer_Stripes.java
+
+jar cf df.jar -C build .
+
+#create fat jar with OpenNLP
+mkdir -p tmp-opennlp
+cd tmp-opennlp
+jar xf /home/siddharth/Hadoop_Project/Assig2/Prob2/opennlp-tools-1.9.3.jar
+jar uf ../df.jar .
+cd ..
+rm -rf tmp-opennlp
+
+Run
+time hadoop jar df.jar partb.TFIDFScorer_Stripes \
+  /largerDataset/Wikipedia-EN-20120601_ARTICLES \
+  /Problem2/2b \
+  /Problem2/top100-df.tsv

@@ -1,0 +1,131 @@
+Problem_1
+
+1a.
+
+Method 1 - Using CleanUp Function
+
+Compile:
+javac -classpath `hadoop classpath` WordCount2Mod.java
+jar cf wordcount2mod.jar WordCount2Mod*.class
+
+Run with Hadoop:
+time hadoop jar wordcount2mod.jar WordCount2Mod /largerDataset/Wikipedia-EN-20120601_ARTICLES /Problem1/1a_CleanUp -skippatterns /Problem1/stopwords.txt
+
+Method 2 - External Command for Sorting
+
+Compile:
+javac -classpath `hadoop classpath` WordCount2.java
+jar cf wordcount2.jar WordCount2*.class
+
+Run with Hadoop:
+time hadoop jar wordcount2.jar WordCount2 /largerDataset/Wikipedia-EN-20120601_ARTICLES /Problem1/1a_ExtSort -skippatterns /Problem1/stopwords.txt
+
+External Sorting:
+hdfs dfs -cat /Problem1/1a_ExtSort/part-r-* | sort -k2 -nr | head -50 > top50.txt 
+
+1b.
+
+Compile:
+javac -classpath `hadoop classpath` CoOccurencePairs.java
+jar cf CoOccurencePairs.jar CoOccurencePairs*.class
+
+D1-
+Run with Hadoop:
+time hadoop jar CoOccurencePairs.jar CoOccurencePairs /largerDataset/Wikipedia-EN-20120601_ARTICLES /Problem1/1b/d1 -topwords /Problem1/top50.txt -d 1
+
+D2-
+time hadoop jar CoOccurencePairs.jar CoOccurencePairs /largerDataset/Wikipedia-EN-20120601_ARTICLES /Problem1/1b/d2 -topwords /Problem1/top50.txt -d 2
+
+D3-
+time hadoop jar CoOccurencePairs.jar CoOccurencePairs /largerDataset/Wikipedia-EN-20120601_ARTICLES /Problem1/1b/d3 -topwords /Problem1/top50.txt -d 3
+
+D4-
+time hadoop jar CoOccurencePairs.jar CoOccurencePairs /largerDataset/Wikipedia-EN-20120601_ARTICLES /Problem1/1b/d4 -topwords /Problem1/top50.txt -d 4
+
+1c.
+Compile:
+javac -classpath `hadoop classpath` CoOccurrenceStripes.java
+jar cf CoOccurrenceStripes.jar CoOccurrenceStripes*.class
+
+Run With Hadoop:
+
+D1:
+time hadoop jar CoOccurrenceStripes.jar CoOccurrenceStripes /largerDataset/Wikipedia-EN-20120601_ARTICLES /Problem1/1c/d1 -topwords /Problem1/top50.txt -d 1
+
+For D2,D3,D4:
+Replace 
+/Problem1/1c/d1 with /Problem1/1c/dn
+-d 1 with -d n
+
+1d.
+
+PAIRS - 
+
+Map Class Level Aggregation - 
+
+Compile:
+javac -classpath `hadoop classpath` Pairs_MapClassLevel.java
+jar cf Pairs_MapClassLevel.jar Pairs_MapClassLevel*.class
+
+Run With Hadoop:
+
+D1:
+time hadoop jar Pairs_MapClassLevel.jar Pairs_MapClassLevel /largerDataset/Wikipedia-EN-20120601_ARTICLES /Problem1/1d/Pairs/MapClassAgg/d1 -topwords /Problem1/top50.txt -d 1
+
+For D2,D3,D4:
+Replace 
+/Problem1/1c/d1 with /Problem1/1c/dn
+-d 1 with -d n
+
+Map Function Level Aggregation -
+
+Compile:
+javac -classpath `hadoop classpath` Pairs_MapFunctionLevel.java
+jar cf Pairs_MapFunctionLevel.jar Pairs_MapFunctionLevel*.class
+
+Run With Hadoop:
+
+D1:
+time hadoop jar Pairs_MapFunctionLevel.jar Pairs_MapFunctionLevel /largerDataset/Wikipedia-EN-20120601_ARTICLES /Problem1/1d/Pairs/MapFunctionAgg/d1 -topwords /Problem1/top50.txt -d 1
+
+For D2,D3,D4:
+Replace 
+/Problem1/1c/d1 with /Problem1/1c/dn
+-d 1 with -d n
+
+STRIPES - 
+
+Map Class Level Aggregation - 
+
+Compile:
+javac -classpath `hadoop classpath` Stripes_MapClassLevel.java
+jar cf Stripes_MapClassLevel.jar Stripes_MapClassLevel*.class
+
+Run With Hadoop:
+
+D1:
+time hadoop jar Stripes_MapClassLevel.jar Stripes_MapClassLevel /largerDataset/Wikipedia-EN-20120601_ARTICLES /Problem1/1d/Stripes/MapClassAgg/d1 -topwords /Problem1/top50.txt -d 1
+
+For D2,D3,D4:
+Replace 
+/Problem1/1c/d1 with /Problem1/1c/dn
+-d 1 with -d n
+
+Map Function Level Aggregation -
+
+Compile:
+javac -classpath `hadoop classpath` Stripes_MapFunctionLevel.java
+jar cf Stripes_MapFunctionLevel.jar Stripes_MapFunctionLevel*.class
+
+Run With Hadoop:
+
+D1:
+time hadoop jar Stripes_MapFunctionLevel.jar Stripes_MapFunctionLevel /largerDataset/Wikipedia-EN-20120601_ARTICLES /Problem1/1d/Stripes/MapFunctionAgg/d1 -topwords /Problem1/top50.txt -d 1
+
+For D2,D3,D4:
+Replace 
+/Problem1/1c/d1 with /Problem1/1c/dn
+-d 1 with -d n
+
+
+

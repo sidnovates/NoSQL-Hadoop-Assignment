@@ -1,0 +1,54 @@
+APACHE HADOOP
+
+Hadoop consists of three components:
+1) HDFS -
+Data split across machines
+Replication is done of data so fault tolerant
+
+In System: 
+Name node (manager manages data) for seeing the map , the block is in which data node
+Data node (worker) for storing data
+Replication of data: 1
+
+2) MapReduce
+Splitting -> Shuffling & Sorting -> Reduce 
+
+3) YARN 
+Resource Manager, Application Master, Node Manager, Containers( contain RAM,bandwidth and all) 
+Application Master assigns node manager the respective containers
+Node Manager further assigns Resource Manager
+ 
+Manages cluster resources
+Schedules jobs
+Controls execution
+
+How to start Using Hadoop:
+
+sudo service ssh start
+start-dfs.sh
+Verify: jps
+NameNode
+DataNode
+SecondaryNameNode
+
+NameNode UI: http://localhost:9870
+
+For putting data in Hadoop:
+hdfs dfs -put ~/path /output_folder
+
+Create class files:
+javac -classpath `hadoop classpath` CoOccurrenceM1.java
+
+create jar file:
+jar cf CoOccurrenceM1.jar CoOccurrenceM1*.class
+
+For running the mapreduce with time:
+time hadoop jar CoOccurrenceM1.jar CoOccurrenceM1 /largerDataset/Wikipedia-EN-20120601_ARTICLES /problem1_Large/output1b -skippatterns /problem1/stopwords.txt
+
+Force delete:
+hdfs dfs -rm -r -skipTrash /Problem2/2a
+
+
+
+
+
