@@ -25,6 +25,7 @@ This repository contains the MapReduce implementation, runtime analysis, and exe
 | Directory / File | Description |
 |------------------|-------------|
 | 💻 **[`Assig2/`](./Assig2)** | Main source code containing Java MapReduce implementations.<br> - `Prob1/`: Word Matrix Generation (Pairs, Stripes).<br> - `Prob2/`: Document Indexing. |
+| 💾 **[`Solution/`](./Solution)** | Generated output files after running the MapReduce jobs.<br> - `Problem1/`: Ranked word counts and co-occurrence matrices.<br> - `Problem2/`: TF-IDF scores and document frequency outputs. |
 | 📈 **[`RunTimeAnalysis/`](./RunTimeAnalysis)** | Detailed performance metrics, scalability data, and comparative analysis (Testing vs. Large datasets). |
 | 📸 **[`ScreenShots/`](./ScreenShots)** | Visual execution logs, Hadoop Namenode UI views, and graphical output verifications. |
 | ⚙️ **[`Problem_1.txt`](./Problem_1.txt) / [`Problem_2.txt`](./Problem_2.txt)** | Step-by-step compilation and execution commands for the Hadoop cluster. |
